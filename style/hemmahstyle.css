@@ -486,3 +486,25 @@ h5.modal-title {
     z-index: 2;
 }
 
+.tileprice {
+    height: 37px;
+    margin-top: 47px;
+    width: 134px;
+}
+
+.bgPrice {
+    background-color: #e06043;
+}
+
+button.btn.btn-small.mx-2.downloadApp {
+    background-color: #df4826;
+}
+.downloadAppLink{
+ color: white;
+}
+
+.downloadApp a:hover {
+    color: white !important;
+    text-decoration: none;
+}
+

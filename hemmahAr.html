@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar">
 
 <head>
@@ -44,6 +44,7 @@
             margin: auto;
             border-radius: 10px;
             overflow: hidden;
+            direction: ltr;
         }
 
         /* Ensure images fill the screen */
@@ -86,6 +87,9 @@
                     <a href="https://app.adjust.com/1m9h6dt6">
                         <img src="assets/HemmaLogo.png" alt="">
                     </a>
+                     <button class="btn btn-small mx-2 downloadApp">
+                        <a href="https://app.adjust.com/1m9h6dt6" class="downloadAppLink">حمل التطبيق</a>
+                    </button>
                 </div>
                 <div class="">
                     <div class="language d-flex" style="align-items: baseline;">
@@ -162,26 +166,52 @@
                 <div class="form-group col-6">
                     <label for="phone">رقم الاتصال <span class="red ml-auto">*</span></label>
                     <input class="form-control" type="tel" maxlength="10" id="phone" name="phone" required>
-                    <p id="error-message" style="color: red; display: none;">يجب أن يبدأ رقم الهاتف المحمول
+                    <p id="error-message" style="color: red; display: none;">
+                        يجب أن يبدأ رقم الهاتف المحمول
                         بالرقم
-                        05 ويجب أن يتكون من 10 أرقام بالضبط</p>
+                        05 ويجب أن يتكون من 10 أرقام بالضبط
+                    </p>
                 </div>
                 <div class="form-group col-6">
-                    <label for="email">الايميل (اختياري) <span class="red ml-auto">*</span></label>
+                    <label for="email">الايميل (اختياري) <span class="red ml-auto"></span></label>
                     <input class="form-control" type="email" id="email" required>
                     <p id="message"></p>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="address">العنوان <span class="red ml-auto">*</span>
+                <label for="address">
+                    العنوان <span class="red ml-auto">*</span>
                     <span class="ml-1">
-                        <label class="address-label">أنشئ عنوانًا
-                            <i class="create las la-plus" data-toggle="modal" data-target=".createPopup"></i></label>
+                        <label class="address-label">
+                            أنشئ عنوانًا
+                            <i class="create las la-plus" data-toggle="modal" data-target=".createPopup"></i>
+                        </label>
                     </span>
                 </label>
                 <input type="hidden" id="addressvalue" name="address-value" required>
                 <input readonly class="form-control" type="text" id="address" name="address" required>
+            </div>
+
+            <div class="row">
+                <!-- Service Type -->
+                <div class="form-group col-12 col-md-5">
+                    <label for="service">نوع الخدمة<span class="red ml-auto">*</span></label>
+                    <select class="form-control" id="service" name="service"></select>
+                </div>
+
+                <!-- Subservice Type -->
+                <div class="form-group col-12 col-md-5">
+                    <label for="subservice">نوع الخدمة الفرعية <span class="red ml-auto">*</span></label>
+                    <select class="form-control" id="subservice" name="service"></select>
+                </div>
+
+                <!-- Max Tile -->
+                <div class="form-group col-12 col-md-2 d-flex align-items-end">
+                    <div id="maxTile" class="tileprice bgPrice text-white p-2 rounded w-100 text-center">
+                        <!-- Selected maximum value will appear here -->
+                    </div>
+                </div>
             </div>
 
             <label for="Visit Date">تاريخ الزيارة<span class="red ml-auto">*</span> </label>
@@ -192,28 +222,21 @@
 
             <div class="form-group d-none">
                 <label for="neighborhood">الحي <span class="red ml-auto">*</span></label>
-                <select class="form-control" id="neighborhood" name="neighborhood">
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="service">نوع الخدمة<span class="red ml-auto">*</span></label>
-                <select class="form-control" id="service" name="service">
-                </select>
+                <select class="form-control" id="neighborhood" name="neighborhood"></select>
             </div>
 
             <div class="form-group">
                 <label for="Attachment">مرفق<span class="red ml-auto"></span></label>
                 <div class="textarea-wrapper">
                     <textarea row="3" id="imageTextArea" class="form-control"
-                        placeholder="انقر على أيقونة الكاميرا لتحميل الصورة"></textarea>
+                              placeholder="انقر على أيقونة الكاميرا لتحميل الصورة"></textarea>
                     <input type="file" id="imageUpload" accept="image/jpeg, image/png" style="display: none;" />
                     <a href="javascript:void(0)" id="cameraIcon" class="camera-icon">📷</a>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="problemdescription">وصف المشكلة<span class="red ml-auto"></span></label>
+                <label for="problemdescription">تفاصيل الطلب<span class="red ml-auto"></span></label>
                 <textarea rows="6" class="form-control" placeholder="اوصف مشكلتك هنا..." id="problemdescription" name="details" required></textarea>
             </div>
 
@@ -337,6 +360,7 @@
         $(document).ready(function () {
             $('.flexslider').flexslider({
                 animation: "slide", // Use "fade" for a fading effect
+                touch: true,
                 controlNav: true,   // Show navigation dots
                 directionNav: true, // Show prev/next arrows
                 slideshow: true,    // Enable auto-slide
