@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var closeModalFooterBtn = document.getElementById("closeModalFooterBtn");
   var AddressCreate = document.getElementById("createAddress");
   var submitForm = document.getElementById("submitRequest");
-  var plusIcon = document.querySelector(".create.la-plus");
+  var plusIcon = document.querySelector(".create");
   submitForm.onclick = function () {
     createRequest();
   };
@@ -763,8 +763,8 @@ async function createRequest() {
       // window.location.reload();
     } else {
       alert(responseData.message);
-      window.location.reload();
-      clearRequestCreateForm();
+      // window.location.reload();
+      // clearRequestCreateForm();
     }
   } catch (error) {
     hideLoader();
