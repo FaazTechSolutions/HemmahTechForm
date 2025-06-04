@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .forEach((t) => t.classList.remove("selected"));
       tile.classList.add("selected");
       selectedDate = new Date(date);
-      createTimeSlots(selectedDate,neighborHood.value, document.getElementById("subservice").value);
+      createTimeSlots(selectedDate,neighborHood.innerText, document.getElementById("subservice").value);
       let currentDate = selectedDate ? selectedDate : new Date();
        VisitingDate = currentDate.toISOString().split("T")[0];
     });
