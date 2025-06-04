@@ -419,8 +419,8 @@ h5.modal-title {
     color: inherit;
   }
 
-  .time-tile {
-    flex: 1 1 calc(14% - 10px); /* Smaller width */
+  /* .time-tile {
+    flex: 1 1 calc(14% - 10px); 
     min-width: 114px;
     max-width: 114px;
     padding: 8px 10px;
@@ -430,7 +430,24 @@ h5.modal-title {
     text-align: center;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-  }
+  } */
+
+  .time-tile {
+    flex: 1 1 calc(14% - 10px);
+    min-width: 114px;
+    max-width: 114px;
+    /* padding: 8px 10px; */
+    font-size: 12px;
+    /* border: 1px solid #ccc; */
+    /* background-color: white; */
+    /* text-align: center; */
+    cursor: pointer;
+    /* transition: background-color 0.2s, color 0.2s, border-color 0.2s; */
+    display: flex
+;
+    align-items: center;
+    gap: 8px;
+}
   
   .time-tile.selected {
     background-color: #dc4726;
@@ -508,3 +525,7 @@ button.btn.btn-small.mx-2.downloadApp {
     text-decoration: none;
 }
 
+.time-tile input {
+    display: inline-block;
+    width: auto;
+}

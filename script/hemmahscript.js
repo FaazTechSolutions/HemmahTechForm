@@ -9,7 +9,6 @@ var Visitingtime = "";
 var attachment = "";
 var serviceId = "";
 var maxTile = document.getElementById("maxTile");
-let subserviceDataMap = new Map();
 var formData = {
   name: '',
   phone: '',
@@ -25,7 +24,6 @@ var formData = {
 var currentLanguage = document.documentElement.lang;
 document.addEventListener("DOMContentLoaded", function () {
   localStorage.clear();
-  initMap();
 
   maxTile.textContent = currentLanguage == "en" ? `0  SAR` : `0 ريال`;
 
@@ -96,11 +94,27 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   });
+  document.getElementById("createneighborhood").addEventListener("click", function () {
+    if (!document.getElementById("createcity").value) {
+      if (currentLanguage == "en") {
+        alert("Select city to proceed");
+        return;
+      }
+      else {
+        alert("اختر المدينة للمتابعة");
+        return;
+      }
+    }
+  });
+  document.getElementById("createcity").addEventListener("change", function () {
+    getNeighbourHoodByCityId(this.value);
+  });
   document.getElementById("service").addEventListener("change", function () {
-    getSubServicesByAddressIdAndServiceId(neighborHood.innerHTML);
+    getSubServicesByAddressIdAndServiceId();
   });
   document.getElementById("subservice").addEventListener("change", function () {
     updateMaximumPrice(content, this.value);
+    // createTimeSlots(neighborHood.innerHTML, this.value);
   });
   var modal = document.getElementById("addressModal");
   var closeModalHeaderBtn = document.getElementById("closeModalHeaderBtn");
@@ -134,6 +148,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var contactid = document.getElementById("contactid");
     modal.style.display = "block";
     clearAddressCreateForm();
+    getCities();
     contactid.value = localStorage.getItem("clientId");
   });
   // When the user clicks anywhere outside of the modal, close it
@@ -155,8 +170,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  const container = document.getElementById("dateTiles");
-  const timeContainer = document.getElementById("timeSlots");
+  const dateTiles = document.getElementById("dateTiles");
 
   for (let i = 0; i < 7; i++) {
     const date = new Date();
@@ -179,67 +193,36 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
 
     tile.addEventListener("click", () => {
-      document
-        .querySelectorAll("#dateTiles .tile")
+      if (!neighborHood.textContent) {
+        if (currentLanguage == "en") {
+          alert("Address not found, Please check the address");
+          return;
+        }
+        else {
+          alert("لم يتم العثور على العنوان، يرجى التحقق من العنوان");
+          return;
+        }
+      }
+      document.querySelectorAll("#dateTiles .tile")
         .forEach((t) => t.classList.remove("selected"));
       tile.classList.add("selected");
       selectedDate = new Date(date);
-      generateTimeSlots();
+      createTimeSlots(selectedDate,neighborHood.value, document.getElementById("subservice").value);
+      let currentDate = selectedDate ? selectedDate : new Date();
+       VisitingDate = currentDate.toISOString().split("T")[0];
     });
 
-    container.appendChild(tile);
+    dateTiles.appendChild(tile);
   }
 
-  function formatHour(hour) {
-    const suffix = hour >= 12 ? "PM" : "AM";
-    const hour12 = hour % 12 || 12;
-    return `${hour12} ${suffix}`;
-  }
-
-  function generateTimeSlots() {
-    timeContainer.innerHTML = "";
-    let currentDate = selectedDate ? selectedDate : new Date();
-    const now = new Date();
-    const isToday = currentDate.toDateString() === now.toDateString();
-    const startHour = 10;
-    const endHour = 22;
-    let currentHour = isToday
-      ? Math.max(startHour, now.getHours() + 1)
-      : startHour;
-    for (let hour = currentHour; hour < endHour; hour++) {
-      const from = formatHour(hour);
-      const to = formatHour(hour + 1);
-      const slot = document.createElement("div");
-      slot.className = "time-tile";
-      const formattedFromTime = from.includes("PM") && currentLanguage === "ar"
-        ? from.replace("PM", "م")
-        : from.includes("AM") && currentLanguage === "ar"
-          ? from.replace("AM", "م")
-          : from;
-
-      const formattedToTime = to.includes("PM") && currentLanguage === "ar"
-        ? to.replace("PM", "م")
-        : to.includes("AM") && currentLanguage === "ar"
-          ? to.replace("AM", "م")
-          : to;
-
-      slot.innerHTML = `<div class="time">${formattedFromTime} - ${formattedToTime}</div>`;
-
-      slot.addEventListener("click", () => {
-        document
-          .querySelectorAll("#timeSlots .time-tile")
-          .forEach((t) => t.classList.remove("selected"));
-        slot.classList.add("selected");
-        selectedTime = `${from} - ${to}`;
-        VisitingDate = currentDate.toISOString().split("T")[0];
-        Visitingtime = `${hour.toString().padStart(2, "0")}:00`;
-      });
-
-      timeContainer.appendChild(slot);
+  document.getElementById("timeSlots").addEventListener("change", function (event) {
+    if (event.target.type === "radio") {
+      const selectedValue = event.target.value;
+      Visitingtime = selectedValue;
     }
-  }
+  });
 
-  generateTimeSlots();
+
 
   document.getElementById("cameraIcon").addEventListener("click", function () {
     document.getElementById("imageUpload").click();
@@ -320,6 +303,7 @@ function getAddressByContactNumber() {
           address.value = data.content.mainAddress.addressTitle;
           neighborHood.value = data.content.mainAddress.neighbourhoodID;
           neighborHood.textContent = data.content.mainAddress.neighbourhoodID;
+          document.getElementById("neighborhood").value = data.content.mainAddress.neighbourhoodID;
           getServicesByAddressId(data.content.mainAddress.neighbourhoodID);
         } else if (data.code == 404) {
           registerUser(phoneNumber);
@@ -364,69 +348,6 @@ async function registerUser(phoneNumber) {
     alert(error);
   }
 }
-async function getMaintenanceCity() {
-  const selectElement = document.getElementById("city");
-  const apiUrl = `${serverUrl}/api/Address/GetMaintenanceCities`;
-  showLoader();
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-    hideLoader();
-    const selectedValue = selectElement.value;
-    selectElement.innerHTML = "";
-    const defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = currentLanguage == "en" ? "Select an option" : "حدد خيارًا";
-    selectElement.appendChild(defaultOption);
-
-    data.content.forEach((item) => {
-      const option = document.createElement("option");
-      option.value = item.cityID;
-      option.textContent = item.cityEn + "-" + item.cityAr;
-      selectElement.appendChild(option);
-    });
-    selectElement.value = selectedValue;
-  } catch (error) {
-    hideLoader();
-    selectElement.innerHTML =
-      '<option value="">Failed to load options</option>';
-  }
-}
-async function getNeighbourHood() {
-  const cityId = document.getElementById("city");
-  const selectElement = document.getElementById("neighborhood");
-  if (cityId.value == "") {
-    alert("Please select city first");
-    return;
-  }
-  const apiUrl = `${serverUrl}/api/Address/GetNeighbourhoodsByCity?cityid=${cityId.value}`;
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-    if (data.code == 404 || data.code == 503) {
-      alert(data.message);
-    }
-    const selectedValue = selectElement.value;
-    selectElement.innerHTML = "";
-    const defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = currentLanguage == "en" ? "Select an option" : "حدد خيارًا";
-    selectElement.appendChild(defaultOption);
-
-    data.content.forEach((item) => {
-      const option = document.createElement("option");
-      option.value = item.neighbourhoodID;
-      option.textContent = item.neighbourhoodEn + "-" + item.neighbourhoodAr;
-      selectElement.appendChild(option);
-    });
-    selectElement.value = selectedValue;
-  } catch (error) {
-    hideLoader();
-    console.error("Error fetching data:", error);
-    selectElement.innerHTML =
-      '<option value="">Select City First and Try Again</option>';
-  }
-}
 var selectedServiceId = "";
 async function getServicesByAddressId(data) {
   const selectElement = document.getElementById("service");
@@ -462,12 +383,12 @@ async function getServicesByAddressId(data) {
 var maximum = 0;
 var content = [];
 var selectedSubServiceValue = "";
-async function getSubServicesByAddressIdAndServiceId(data) {
+async function getSubServicesByAddressIdAndServiceId() {
   const service = document.getElementById("service").value;
+  const neighborhood =  document.getElementById("neighborhood").value?  document.getElementById("neighborhood").value : neighborHood.textContent;
   const selectElement = document.getElementById("subservice");
-  const apiUrl = `${serverUrl}/api/General/GetServicesBySubCategoryID?SubcategoryID=${service}&NeighborhoodID=${data}`;
+  const apiUrl = `${serverUrl}/api/General/GetServicesBySubCategoryID?SubcategoryID=${service}&NeighborhoodID=${neighborhood}`;
   //const apiUrl = `${serverUrl2}/api/General/GetServicesBySubCategoryID?SubcategoryID=8cc8ad41-3fc3-ee11-9078-000d3a65395f&NeighborhoodID=377be2e2-bea9-e711-aeda-005056866d96`;
-  subserviceDataMap.clear();
   showLoader();
 
   try {
@@ -492,8 +413,6 @@ async function getSubServicesByAddressIdAndServiceId(data) {
         option.value = item.serviceID;
         option.textContent = currentLanguage == "en" ? item.englishName : item.arabicName;
         selectElement.appendChild(option);
-
-        subserviceDataMap.set(item.subCategoryID, item); // Save full object
       });
 
       // Restore previous selection if any
@@ -501,9 +420,6 @@ async function getSubServicesByAddressIdAndServiceId(data) {
         selectElement.value = selectedValue;
         selectedSubServiceValue = selectedValue;
       }
-
-      // Trigger change event to update UI (like maxTile)
-      selectElement.dispatchEvent(new Event("change"));
 
     } else {
       alert(data.message || "Failed to load subservices.");
@@ -521,31 +437,6 @@ function updateMaximumPrice(content, selectedValue) {
     maximum = priceData[0].totalDurationprice;
     maxTile.textContent = currentLanguage == "en" ? `${maximum}  SAR` : `${maximum}  ريال`;
   }
-}
-let map;
-let marker;
-let lat;
-let lng;
-function initMap() {
-  const center = { lat: 24.7136, lng: 46.6753 };
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: center,
-    zoom: 12,
-  });
-  map.addListener("click", function (event) {
-    lat = event.latLng.lat();
-    lng = event.latLng.lng();
-    getCurrentNeighborHoodByLatLang(lat, lng);
-    if (marker) {
-      marker.setMap(null);
-    }
-
-    marker = new google.maps.Marker({
-      position: event.latLng,
-      map: map,
-      title: `Selected Location: ${lat}, ${lng}`,
-    });
-  });
 }
 async function getCurrentNeighborHoodByLatLang(lat, lng) {
   const neighborHood = document.getElementById("createneighborhood");
@@ -594,8 +485,8 @@ async function createAddress() {
     addressTitle: addresstitle.value,
     cityID: city.value,
     neighbourhoodID: neighborhood.value,
-    latitude: lat,
-    longitude: lng,
+    latitude: "",
+    longitude: "",
     buildingNO: buildingno.value,
     preferedPhone: phonenumber.value,
     isMain: true,
@@ -606,8 +497,8 @@ async function createAddress() {
     !data.addressTitle ||
     !data.cityID ||
     !data.neighbourhoodID ||
-    !data.latitude ||
-    !data.longitude ||
+    // !data.latitude ||
+    // !data.longitude ||
     !data.buildingNO ||
     !data.preferedPhone ||
     !data.isMain ||
@@ -633,8 +524,8 @@ async function createAddress() {
       document.getElementById("addressvalue").value =
         responseData.content.addressId;
       document.getElementById("address").value = addresstitle.value;
-      document.getElementById("neighborhood").innerHTML =
-        neighborhood.innerHTML;
+      document.getElementById("neighborhood").innerHTML = neighborhood.innerHTML;
+      document.getElementById("neighborhood").value = neighborhood.value;
       getServicesByAddressId(neighborhood.value);
     } else {
       alert(responseData.message);
@@ -799,4 +690,113 @@ function updateDescription() {
   if (formData.notes) output += currentLanguage == "en" ? `Notes: ${formData.notes}\n` : `ملحوظات: ${formData.notes}\n`;
 
   Description.value = output.trim();
+}
+
+
+async function getCities() {
+  const selectElement = document.getElementById("createcity");
+  const apiUrl = `${serverUrl}/api/Address/GetMaintenanceCities`;
+  showLoader();
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    hideLoader();
+    if (data.code == 200) {
+      selectElement.innerHTML = "";
+
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = currentLanguage == "en" ? "Select an option" : "حدد خيارًا";
+      selectElement.appendChild(defaultOption);
+      data.content.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.cityID;
+        option.textContent = currentLanguage == "en" ? item.cityEn : item.cityAr;
+        selectElement.appendChild(option);
+      });
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    hideLoader();
+    console.error("Error fetching data:", error);
+    selectElement.innerHTML =
+      '<option value="">Failed to load options</option>';
+  }
+}
+
+async function getNeighbourHoodByCityId(data) {
+  const selectElement = document.getElementById("createneighborhood");
+  const apiUrl = `${serverUrl}/api/Address/GetNeighbourhoodsByCity?cityid=${data}`;
+  showLoader();
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    hideLoader();
+    if (data.code == 200) {
+      selectElement.innerHTML = "";
+
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = currentLanguage == "en" ? "Select an option" : "حدد خيارًا";
+      selectElement.appendChild(defaultOption);
+      data.content.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.neighbourhoodID;
+        option.textContent = currentLanguage == "en" ? item.neighbourhoodEn : item.neighbourhoodAr;
+        selectElement.appendChild(option);
+      });
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    hideLoader();
+    console.error("Error fetching data:", error);
+    selectElement.innerHTML =
+      '<option value="">Failed to load options</option>';
+  }
+}
+
+async function createTimeSlots(date,neighborhoodId, serviceId) {
+  const isoString = date.toISOString();
+  const container = document.getElementById("timeSlots");
+  const apiUrl = `${serverUrl}/api/Labor/GetAvailableTimeSlots?day=${isoString}&neighbourhoodId=${neighborhoodId}&serviceId=${serviceId}`;
+  showLoader();
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    hideLoader();
+    if (data.length > 0) {
+      container.innerHTML = "";
+      data.forEach(slot => {
+        // Create radio button element
+        const divContainer = document.createElement("div");
+        divContainer.classList.add("time-tile");
+
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.id = `time-${slot.startTime}`;
+        radio.name = "timeSlot"; 
+        radio.value = slot.startTime;
+
+        // Create label for the radio button
+        const label = document.createElement("label");
+        label.htmlFor = radio.id;
+        label.textContent = slot.startTimeStr;
+
+        // Append the radio button and its label to the container
+        divContainer.appendChild(radio);
+        divContainer.appendChild(label);
+        container.appendChild(divContainer);
+      });
+    }
+    else {
+      alert(data.message);
+    }
+  }
+  catch (error){
+    alert(error);
+  }
+
 }

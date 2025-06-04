@@ -19,9 +19,6 @@
     <!-- Line Awesome Icons -->
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
-    <!-- Google Maps API Key-->
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLYS9P53EJjWCJWj34Z4qZfEmaNM2rU8c&amp;libraries=places&amp;language=en&amp;v=weekly"></script>
 
     <!-- Google Tag Manager -->
 
@@ -214,10 +211,10 @@
                 </div>
             </div>
 
-            <label for="Visit Date">تاريخ الزيارة<span class="red ml-auto">*</span> </label>
+            <label for="Visit Date">التواريخ المتاحة<span class="red ml-auto">*</span> </label>
             <div class="tile-container" id="dateTiles"></div>
 
-            <label for="Visit Date">وقت الزيارة <span class="red ml-auto">*</span> </label>
+            <label for="Visit Date">الأوقات المتاحة<span class="red ml-auto">*</span> </label>
             <div class="tile-container" id="timeSlots"></div>
 
             <div class="form-group d-none">
@@ -311,18 +308,18 @@
                         <label for="addresstitle">عنوان<span class="red ml-auto">*</span></label>
                         <input class="form-control" type="text" id="addresstitle" name="addresstitle" required>
                     </div>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label for="map">حدد الموقع<span class="red ml-auto">*</span></label>
                         <div id="map"></div>
-                    </div>
+                    </div> -->
                     <div class="form-group">
                         <label for="createcity">مدينة <span class="red ml-auto">*</span></label>
-                        <select class="form-control" id="createcity" name="createcity" readonly>
+                        <select class="form-control" id="createcity" name="createcity">
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="createneighborhood">الحي <span class="red ml-auto">*</span></label>
-                        <select class="form-control" id="createneighborhood" name="createneighborhood" readonly>
+                        <select class="form-control" id="createneighborhood" name="createneighborhood">
                         </select>
                     </div>
                     <div class="form-group">
@@ -341,7 +338,7 @@
                     <div class="form-group">
                         <label for="buildingType">نوع المبنى<span class="red ml-auto">*</span></label>
                         <select class="form-control" id="buildingType" name="buildingType" readonly>
-                            <option value="">Select Building Type</option>
+                            <option value="">اختر نوع المبنى</option>
                             <option value="100000000">شقة</option>
                             <option value="100000001">فيلا</option>
                         </select>
