@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .forEach((t) => t.classList.remove("selected"));
       tile.classList.add("selected");
       selectedDate = new Date(date);
-      createTimeSlots(selectedDate,neighborHood.innerText, document.getElementById("subservice").value);
+      createTimeSlots(selectedDate, neighborHood.value ? neighborHood.value : neighborHood.innerText, document.getElementById("subservice").value);
       let currentDate = selectedDate ? selectedDate : new Date();
        VisitingDate = currentDate.toISOString().split("T")[0];
     });
@@ -620,6 +620,7 @@ async function createRequest() {
   data.problemDescription =
     "Request Details: " + data.problemDescription + " " + `customerId = '${data.customerID}', customerAddressID = '${data.customerAddressID}', service = '${data.service}', numberOfItems = '${data.numberOfItems}', startDate = '${data.startDate}', customerHasTools = '${data.customerHasTools}'`;
   if (
+    !document.getElementById("name").value ||
     !data.customerID ||
     !data.customerAddressID ||
     !data.service ||
